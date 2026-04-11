@@ -30,14 +30,46 @@ const basemap = new TileLayer({
 
 // ── Playground styles ─────────────────────────────────────────────────────────
 
+function makeHatchPattern(color, bgColor) {
+    const size = 10;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, size, size);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, size);
+    ctx.lineTo(size, 0);
+    ctx.stroke();
+    return ctx.createPattern(canvas, 'repeat');
+}
+
+const _hatchComplete = makeHatchPattern('rgba(34,139,34,0.55)',  'rgba(34,139,34,0.08)');
+const _hatchPartial  = makeHatchPattern('rgba(180,130,0,0.55)',  'rgba(234,179,8,0.08)');
+const _hatchMissing  = makeHatchPattern('rgba(200,50,50,0.55)',  'rgba(239,68,68,0.06)');
+
 const styles = {
-    complete: new Style({ fill: new Fill({ color: 'rgba(34,139,34,0.22)' }),  stroke: new Stroke({ color: '#155215', width: 1.5 }) }),
-    partial:  new Style({ fill: new Fill({ color: 'rgba(234,179,8,0.22)' }), stroke: new Stroke({ color: '#92400e', width: 1.5 }) }),
-    missing:  new Style({ fill: new Fill({ color: 'rgba(239,68,68,0.18)' }), stroke: new Stroke({ color: '#991b1b', width: 1.5 }) }),
+    complete:      new Style({ fill: new Fill({ color: 'rgba(34,139,34,0.22)' }),  stroke: new Stroke({ color: '#155215', width: 1.5 }) }),
+    partial:       new Style({ fill: new Fill({ color: 'rgba(234,179,8,0.22)' }),  stroke: new Stroke({ color: '#92400e', width: 1.5 }) }),
+    missing:       new Style({ fill: new Fill({ color: 'rgba(239,68,68,0.18)' }),  stroke: new Stroke({ color: '#991b1b', width: 1.5 }) }),
+    completeHatch: new Style({ fill: new Fill({ color: _hatchComplete }), stroke: new Stroke({ color: '#155215', width: 1.5, lineDash: [6, 3] }) }),
+    partialHatch:  new Style({ fill: new Fill({ color: _hatchPartial }),  stroke: new Stroke({ color: '#92400e', width: 1.5, lineDash: [6, 3] }) }),
+    missingHatch:  new Style({ fill: new Fill({ color: _hatchMissing }),  stroke: new Stroke({ color: '#991b1b', width: 1.5, lineDash: [6, 3] }) }),
 };
 
 function playgroundStyle(feature) {
-    return styles[playgroundCompleteness(feature.getProperties())] ?? styles.missing;
+    const props = feature.getProperties();
+    const restricted = props.access === 'private' || props.access === 'customers';
+    const c = playgroundCompleteness(props);
+    if (restricted) {
+        if (c === 'complete') return styles.completeHatch;
+        if (c === 'partial')  return styles.partialHatch;
+        return styles.missingHatch;
+    }
+    return styles[c] ?? styles.missing;
 }
 
 // ── Map ───────────────────────────────────────────────────────────────────────
@@ -152,6 +184,11 @@ function closeDetailModal() {
 
 document.getElementById('detail-panel-close').addEventListener('click', closeDetailModal);
 detailBackdrop.addEventListener('click', closeDetailModal);
+// ESC forwarded from spielplatzkarte iframe (iframe captures keyboard focus after a click)
+window.addEventListener('message', e => {
+    if (e.data?.type === 'spielplatzkarte:escape') closeDetailModal();
+});
+
 let lastShift = 0;
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closeDetailModal(); return; }
