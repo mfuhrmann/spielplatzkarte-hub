@@ -5,22 +5,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm install          # Install dependencies (vite, bootstrap, bootstrap-icons, ol)
-npm start            # Dev server at http://localhost:5173
-npm run build        # Production build → dist/
-npm run serve        # Preview production build locally
-npm test             # Run Playwright browser tests (Chromium, Firefox, WebKit)
-npx playwright test --project=webkit   # Run tests for one browser only
+make install          # Install npm dependencies
+make dev              # Start Vite dev server at http://localhost:5173
+make build            # Production build → dist/
+make serve            # Preview production build locally
+make install-browsers # Install Playwright browsers (first time only)
+make test             # Run browser tests (Chromium, Firefox, WebKit)
+make clean            # Remove dist/
+make help             # List all available targets
 ```
 
-Docker (production-equivalent):
+Single-browser test run:
+```bash
+npx playwright test --project=webkit
+```
+
+Docker:
 ```bash
 cp .env.example .env
-docker compose up -d --build app   # Rebuild after code changes
-# Accessible at http://localhost:8090 (default APP_PORT)
+make docker-up        # Start container (http://localhost:8090)
+make docker-build     # Rebuild image after code changes
+make docker-down      # Stop container
 ```
 
-No linting is configured. Playwright browsers must be installed once before running tests: `npx playwright install chromium firefox webkit`.
+No linting is configured.
 
 ## Git Workflow
 
