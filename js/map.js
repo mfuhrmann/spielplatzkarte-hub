@@ -100,6 +100,9 @@ export const map = new Map({
 // opts this element out of passive mode so OL's own handler can zoom normally.
 map.getViewport().addEventListener('wheel', () => {}, { passive: false });
 
+// Expose for automated tests and browser debugging.
+window.__map = map;
+
 // ── Popup ─────────────────────────────────────────────────────────────────────
 
 const popupEl = document.getElementById('popup');
