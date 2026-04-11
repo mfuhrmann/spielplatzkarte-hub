@@ -95,6 +95,14 @@ export const map = new Map({
     }),
 });
 
+// Safari makes wheel events passive by default, preventing OL's MouseWheelZoom
+// handler from calling preventDefault(). Registering any non-passive listener
+// opts this element out of passive mode so OL's own handler can zoom normally.
+map.getViewport().addEventListener('wheel', () => {}, { passive: false });
+
+// Expose for automated tests and browser debugging.
+window.__map = map;
+
 // ── Popup ─────────────────────────────────────────────────────────────────────
 
 const popupEl = document.getElementById('popup');
