@@ -1,5 +1,6 @@
 @import "bootstrap/dist/css/bootstrap.min.css";
 @import "bootstrap-icons/font/bootstrap-icons.css";
+@import "./ol_controls.css";
 
 /* ── Layout ──────────────────────────────────────────────────────────────────── */
 
@@ -161,22 +162,3 @@ html, body {
 .dot-partial  { color: #ca8a04; }
 .dot-missing  { color: #dc2626; }
 
-/* ── OL controls ─────────────────────────────────────────────────────────────── */
-
-.ol-control button {
-    background: white !important;
-    color: #374151 !important;
-    border-radius: 8px !important;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.12) !important;
-    border: none !important;
-}
-
-.ol-scale-line {
-    background: rgba(255,255,255,0.85);
-    border-radius: 6px;
-    padding: 3px 8px;
-}
-
-.ol-attribution {
-    font-size: 11px;
-}

@@ -1,0 +1,64 @@
+/* OpenLayers controls — mirrored from spielplatzkarte */
+
+/* Zoom controls — right side */
+div#map div.ol-zoom {
+    top: auto;
+    bottom: 80px;
+    right: 14px;
+    left: auto;
+}
+
+div#map div.ol-zoom .ol-zoom-in,
+div#map div.ol-zoom .ol-zoom-out {
+    width: 34px;
+    height: 34px;
+    font-size: 20px;
+    line-height: 34px;
+    background: white;
+    color: #374151;
+    border-radius: 8px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.15);
+    border: none;
+    margin-bottom: 4px;
+    display: block;
+}
+
+div#map div.ol-zoom .ol-zoom-in:hover,
+div#map div.ol-zoom .ol-zoom-out:hover {
+    background: #f9fafb;
+}
+
+/* Scale bar — bottom left */
+div#map div.ol-scale-line,
+div#map div.ol-scale-bar {
+    bottom: 32px;
+    left: 14px;
+    background: rgba(255,255,255,0.85);
+    border-radius: 6px;
+    padding: 3px 8px;
+}
+
+/* Attribution — bottom left, above scale */
+div#map div.ol-attribution {
+    bottom: 8px;
+    right: auto;
+    left: 14px;
+    background: rgba(255,255,255,0.8);
+    border-radius: 6px;
+    font-size: 11px;
+}
+
+div#map div.ol-attribution button {
+    display: none;
+}
+
+div#map div.ol-attribution ul {
+    margin: 0;
+    padding: 2px 6px;
+}
+
+@media (max-width: 768px) {
+    div#map div.ol-zoom {
+        display: none;
+    }
+}
