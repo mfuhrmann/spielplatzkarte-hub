@@ -95,6 +95,13 @@ export const map = new Map({
     }),
 });
 
+// Safari (WebKit) treats wheel events as passive by default, which prevents
+// OpenLayers from calling preventDefault() in its MouseWheelZoom handler —
+// the browser swallows the scroll before OL can act on it. Registering a
+// non-passive listener on the OL viewport element opts the element out of
+// passive wheel handling so OL's zoom works normally.
+map.getViewport().addEventListener('wheel', e => e.preventDefault(), { passive: false });
+
 // ── Popup ─────────────────────────────────────────────────────────────────────
 
 const popupEl = document.getElementById('popup');
