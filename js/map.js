@@ -13,7 +13,7 @@ import { defaults as defaultControls, ScaleLine } from 'ol/control.js';
 
 import { mapZoom, mapMinZoom, mapCenter } from './config.js';
 import { playgroundCompleteness } from './completeness.js';
-import { loadRegistry, fetchInstancePlaygrounds } from './registry.js';
+import { loadRegistry, fetchInstancePlaygrounds, fetchInstanceMeta } from './registry.js';
 import { version } from '../package.json';
 
 document.getElementById('app-version').textContent = version;
@@ -177,8 +177,18 @@ export async function loadAllInstances() {
         const statusEl = itemEl?.querySelector('.instance-status');
 
         try {
-            const result = await fetchInstancePlaygrounds(inst);
+            // Fetch meta and playgrounds in parallel
+            const [meta, result] = await Promise.all([
+                fetchInstanceMeta(inst),
+                fetchInstancePlaygrounds(inst),
+            ]);
             if (!result) throw new Error('no data');
+
+            // Use the OSM relation name if available, fall back to registry name
+            if (meta?.name) {
+                inst = { ...inst, name: meta.name };
+                if (itemEl) itemEl.querySelector('.instance-name').textContent = meta.name;
+            }
 
             const features = format.readFeatures(result.geojson);
 

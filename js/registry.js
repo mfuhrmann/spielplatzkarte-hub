@@ -15,6 +15,19 @@ export async function loadRegistry() {
     return _registry;
 }
 
+// Fetch instance metadata (name, playground_count, bbox) from get_meta.
+// Falls back gracefully — name from registry is used if meta is unavailable.
+export async function fetchInstanceMeta(instance) {
+    const url = `${instance.url.replace(/\/$/, '')}/api/rpc/get_meta`;
+    try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        return await res.json();
+    } catch {
+        return null;
+    }
+}
+
 // Fetch playground GeoJSON from a single instance.
 // Returns { instance, geojson } or null on failure.
 export async function fetchInstancePlaygrounds(instance) {

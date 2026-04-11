@@ -1,8 +1,7 @@
 [
   {
-    "name": "Beispielregion (Demo)",
-    "url": "https://spielplatzkarte.example.de",
-    "bbox": [8.0, 49.5, 9.5, 50.5],
-    "description": "Beispieleintrag – bitte durch echte Instanzen ersetzen"
+    "name": "Rhein-Main (lokal)",
+    "url": "http://localhost:8080",
+    "bbox": [8.1, 49.8, 9.0, 50.3]
   }
 ]
