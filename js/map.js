@@ -13,7 +13,7 @@ import { defaults as defaultControls, ScaleLine } from 'ol/control.js';
 
 import { mapZoom, mapMinZoom, mapCenter } from './config.js';
 import { playgroundCompleteness } from './completeness.js';
-import { loadRegistry, fetchInstancePlaygrounds, fetchInstanceMeta } from './registry.js';
+import { loadRegistry, fetchInstancePlaygrounds, fetchInstanceMeta, fetchInstanceVersion } from './registry.js';
 import { version } from '../package.json';
 
 document.getElementById('app-version').textContent = version;
@@ -188,9 +188,10 @@ export async function loadAllInstances() {
         const statusEl = itemEl?.querySelector('.instance-status');
 
         try {
-            // Fetch meta and playgrounds in parallel
-            const [meta, result] = await Promise.all([
+            // Fetch meta, version and playgrounds in parallel
+            const [meta, version, result] = await Promise.all([
                 fetchInstanceMeta(inst),
+                fetchInstanceVersion(inst),
                 fetchInstancePlaygrounds(inst),
             ]);
             if (!result) throw new Error('no data');
@@ -214,7 +215,8 @@ export async function loadAllInstances() {
 
             if (statusEl) {
                 statusEl.className = 'instance-status ok';
-                statusEl.innerHTML = `<span class="bi bi-check-circle-fill"></span> ${features.length}`;
+                const versionTag = version ? ` <span class="instance-version">v${version}</span>` : '';
+                statusEl.innerHTML = `<span class="bi bi-check-circle-fill"></span> ${features.length}${versionTag}`;
             }
             countEl.textContent = `${totalCount} Spielplätze`;
         } catch {

@@ -15,6 +15,19 @@ export async function loadRegistry() {
     return _registry;
 }
 
+// Fetch the app version from /version.json served by the instance.
+export async function fetchInstanceVersion(instance) {
+    const url = `${instance.url.replace(/\/$/, '')}/version.json`;
+    try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const data = await res.json();
+        return data.version ?? null;
+    } catch {
+        return null;
+    }
+}
+
 // Fetch instance metadata (name, playground_count, bbox) from get_meta.
 // Falls back gracefully — name from registry is used if meta is unavailable.
 export async function fetchInstanceMeta(instance) {

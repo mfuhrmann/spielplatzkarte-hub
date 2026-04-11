@@ -110,6 +110,12 @@ html, body {
 .instance-status.ok      { color: #16a34a; }
 .instance-status.error   { color: #dc2626; }
 
+.instance-version {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-left: 4px;
+}
+
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { display: inline-block; animation: spin 1s linear infinite; }
 
