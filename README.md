@@ -38,9 +38,21 @@ The Hub is a thin static frontend. It has no database of its own — all playgro
 
 ---
 
-## Registering an instance
+## The registry
 
-Edit `public/registry.json` and add an entry:
+The registry is a JSON file that lists all regional instances the Hub should load. Its lifecycle:
+
+```
+public/registry.json   (source, edit this)
+        ↓  vite build
+dist/registry.json     (build output)
+        ↓  Docker image
+/usr/share/nginx/html/registry.json   (served by nginx)
+```
+
+**`public/registry.json` is the canonical source.** Vite copies it unchanged into `dist/` during the build, and Docker bakes it into the image. nginx serves it at `/registry.json`.
+
+### Format
 
 ```json
 [
@@ -52,11 +64,27 @@ Edit `public/registry.json` and add an entry:
 ]
 ```
 
-- `name` — displayed as fallback if `get_meta` is unavailable
-- `url` — base URL of the regional Spielplatzkarte instance (no trailing slash)
-- `bbox` — `[minLon, minLat, maxLon, maxLat]` in WGS84, optional
+| Field | Required | Description |
+|---|---|---|
+| `name` | yes | Displayed as fallback if `get_meta` is unavailable |
+| `url` | yes | Base URL of the regional instance — no trailing slash |
+| `bbox` | no | `[minLon, minLat, maxLon, maxLat]` in WGS84 |
 
 The instance name is automatically resolved from the OSM relation name via `get_meta` at runtime. The registry `name` is only used as a fallback.
+
+### Adding an instance without rebuilding
+
+For production deployments where rebuilding is inconvenient, mount `registry.json` as a Docker volume so you can edit it on the host without touching the image:
+
+```yaml
+# docker-compose.yml
+services:
+  hub:
+    volumes:
+      - ./registry.json:/usr/share/nginx/html/registry.json:ro
+```
+
+Then keep a `registry.json` next to your `docker-compose.yml` on the host. nginx serves it directly; changes take effect on the next browser reload (the file is served with `Cache-Control: no-store`).
 
 > **Note:** The regional instance must have CORS enabled on its `/api/` endpoint. See [Requirements for regional instances](#requirements-for-regional-instances).
 
@@ -71,27 +99,53 @@ Each registered Spielplatzkarte instance must:
 
 Both are included in spielplatzkarte v0.2.1 and later.
 
+### CORS troubleshooting
+
+If an instance shows an error in the Hub's regions panel, check CORS first:
+
+```bash
+curl -I -H "Origin: https://your-hub.example.de" \
+  https://your-instance.example.de/api/rpc/get_meta
+```
+
+The response must include `Access-Control-Allow-Origin: *`. If it doesn't:
+
+- Confirm `nginx.conf` on the regional instance has `add_header Access-Control-Allow-Origin "*" always;` inside the `location /api/` block
+- Rebuild or reload the regional instance's nginx: `docker compose exec app nginx -s reload`
+
 ---
 
 ## Deploy
 
-### 1. Configure
+### 1. Clone and configure
 
 ```bash
-cp .env.example .env
+git clone https://github.com/mfuhrmann/spielplatzkarte-hub.git
+cd spielplatzkarte-hub
 ```
 
-Edit `.env` if needed (defaults work for a local setup):
+Create a `.env` file (all settings have defaults, so this is optional for a local setup):
 
 ```env
-MAP_CENTER=10.5,51.2   # lon,lat — centre of Germany
+REGISTRY_URL=./registry.json   # or a remote URL
+MAP_CENTER=10.5,51.2           # lon,lat — centre of the initial view
 MAP_ZOOM=5
+MAP_MIN_ZOOM=4
 APP_PORT=8090
 ```
 
 ### 2. Register instances
 
-Edit `public/registry.json` and add your regional instances.
+Edit `public/registry.json` and add your regional instances before building:
+
+```json
+[
+  {
+    "name": "My City",
+    "url": "https://playground-map.example.de"
+  }
+]
+```
 
 ### 3. Start
 
@@ -100,6 +154,26 @@ docker compose up -d --build
 ```
 
 The Hub will be available at `http://localhost:8090` (or the port set in `APP_PORT`).
+
+### Production: running behind a reverse proxy
+
+The Hub container listens on port 80 internally. A typical nginx reverse proxy config for TLS termination:
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name hub.example.de;
+
+    ssl_certificate     /etc/letsencrypt/live/hub.example.de/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/hub.example.de/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:8090;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
 
 ---
 
@@ -130,12 +204,25 @@ The Hub will be available at `http://localhost:8090` (or the port set in `APP_PO
 
 ## Local development
 
+**Requirements:** [Node.js](https://nodejs.org/) v18 or newer
+
 ```bash
 npm install
 npm start    # dev server at http://localhost:5173
 ```
 
-A running regional instance is needed to load playground data. Point `public/registry.json` at it.
+Point `public/registry.json` at a running regional instance — a local one works fine:
+
+```json
+[
+  {
+    "name": "Local instance",
+    "url": "http://localhost:8080"
+  }
+]
+```
+
+The Vite dev server serves `public/registry.json` directly (no nginx involved). Changes to the registry take effect on page reload — no build step needed.
 
 ---
 
