@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spielplatzkarte Hub</title>
+    <link rel="icon" type="image/svg+xml" href="./img/favicon.svg">
+    <!-- Runtime config (written by docker-entrypoint.sh from env vars) -->
+    <script src="./config.js"></script>
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- Popup anchor for hover tooltips -->
+<div id="popup"></div>
+
+<!-- Top bar -->
+<div id="topbar">
+    <div id="topbar-title">
+        <span class="bi bi-geo-alt-fill"></span>
+        Spielplatzkarte Hub
+    </div>
+    <div id="instance-count" class="text-muted" style="font-size:13px;"></div>
+</div>
+
+<!-- Instance list panel -->
+<div id="instance-panel">
+    <div class="panel-header">
+        <span class="bi bi-diagram-3"></span>
+        Regionen
+    </div>
+    <div id="instance-list">
+        <div class="text-muted" style="font-size:13px; padding:8px 0;">
+            <i>Wird geladen …</i>
+        </div>
+    </div>
+    <div id="panel-footer">
+        <small class="text-muted">
+            <a href="https://github.com/mfuhrmann/spielplatzkarte" target="_blank" rel="noopener">
+                Spielplatzkarte
+            </a>
+            &mdash; v<span id="app-version"></span>
+        </small>
+    </div>
+</div>
+
+<script type="module" src="./js/main.js"></script>
+</body>
+</html>

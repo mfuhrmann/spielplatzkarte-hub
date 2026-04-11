@@ -1,0 +1,182 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+/* ── Layout ──────────────────────────────────────────────────────────────────── */
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+#map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* ── Top bar ─────────────────────────────────────────────────────────────────── */
+
+#topbar {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: white;
+    border-radius: 24px;
+    padding: 8px 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    z-index: 100;
+    white-space: nowrap;
+}
+
+#topbar-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+}
+
+#topbar-title .bi {
+    color: #16a34a;
+    margin-right: 4px;
+}
+
+/* ── Instance panel ──────────────────────────────────────────────────────────── */
+
+#instance-panel {
+    position: absolute;
+    top: 64px;
+    left: 12px;
+    width: 240px;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    z-index: 100;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-header {
+    padding: 12px 14px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.panel-header .bi {
+    margin-right: 5px;
+    color: #6b7280;
+}
+
+#instance-list {
+    padding: 8px 14px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.instance-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid #f9fafb;
+}
+
+.instance-item:last-child {
+    border-bottom: none;
+}
+
+.instance-name {
+    font-size: 13px;
+    color: #111827;
+}
+
+.instance-status {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.instance-status.loading { color: #9ca3af; }
+.instance-status.ok      { color: #16a34a; }
+.instance-status.error   { color: #dc2626; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { display: inline-block; animation: spin 1s linear infinite; }
+
+#panel-footer {
+    padding: 8px 14px;
+    border-top: 1px solid #f3f4f6;
+}
+
+/* ── Popup / Popover ─────────────────────────────────────────────────────────── */
+
+#popup {
+    position: absolute;
+    pointer-events: none;
+}
+
+.popover {
+    max-width: 280px;
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.16);
+    font-family: system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.popover-arrow::before,
+.popover-arrow::after { display: none; }
+
+.popover .popover-header {
+    background: white;
+    border-bottom: 1px solid #f3f4f6;
+    border-radius: 14px 14px 0 0;
+    padding: 10px 12px 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.popover .popover-body {
+    padding: 8px 12px 10px;
+    font-size: 13px;
+    color: #4b5563;
+}
+
+/* ── Completeness dots ───────────────────────────────────────────────────────── */
+
+.dot-complete { color: #16a34a; }
+.dot-partial  { color: #ca8a04; }
+.dot-missing  { color: #dc2626; }
+
+/* ── OL controls ─────────────────────────────────────────────────────────────── */
+
+.ol-control button {
+    background: white !important;
+    color: #374151 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.12) !important;
+    border: none !important;
+}
+
+.ol-scale-line {
+    background: rgba(255,255,255,0.85);
+    border-radius: 6px;
+    padding: 3px 8px;
+}
+
+.ol-attribution {
+    font-size: 11px;
+}

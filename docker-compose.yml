@@ -1,0 +1,21 @@
+# Spielplatzkarte Hub — federation map
+#
+# Start:
+#   docker compose up -d
+#
+# Rebuild after code changes:
+#   docker compose up -d --build app
+
+services:
+
+  # ── nginx — serves the Vite app and the registry.json ───────────────────────
+  app:
+    build: .
+    ports:
+      - "${APP_PORT:-8090}:80"
+    environment:
+      REGISTRY_URL:  ${REGISTRY_URL:-./registry.json}
+      MAP_ZOOM:      ${MAP_ZOOM:-5}
+      MAP_MIN_ZOOM:  ${MAP_MIN_ZOOM:-4}
+      MAP_CENTER:    ${MAP_CENTER:-10.5,51.2}
+    restart: unless-stopped

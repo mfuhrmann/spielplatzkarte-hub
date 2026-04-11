@@ -1,0 +1,17 @@
+{
+  "name": "spielplatzkarte-hub",
+  "version": "0.1.0",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.3",
+    "bootstrap-icons": "^1.13.1",
+    "ol": "latest"
+  }
+}
