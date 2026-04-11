@@ -132,12 +132,37 @@ map.on('pointermove', function (e) {
 });
 
 // Click → open regional instance in detail panel
+const detailBackdrop = document.getElementById('detail-backdrop');
 const detailPanel = document.getElementById('detail-panel');
 const detailIframe = document.getElementById('detail-iframe');
 const detailTitle = document.getElementById('detail-panel-title');
-document.getElementById('detail-panel-close').addEventListener('click', () => {
+
+function openDetailModal(url, title) {
+    detailIframe.src = url;
+    detailTitle.textContent = title;
+    detailBackdrop.classList.add('open');
+    detailPanel.classList.add('open');
+}
+
+function closeDetailModal() {
+    detailBackdrop.classList.remove('open');
     detailPanel.classList.remove('open');
     detailIframe.src = '';
+}
+
+document.getElementById('detail-panel-close').addEventListener('click', closeDetailModal);
+detailBackdrop.addEventListener('click', closeDetailModal);
+let lastShift = 0;
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeDetailModal(); return; }
+    if (e.key !== 'Shift') { lastShift = 0; return; }
+    const now = Date.now();
+    if (now - lastShift < 500) {
+        document.getElementById('topbar-search-input').select();
+        lastShift = 0;
+    } else {
+        lastShift = now;
+    }
 });
 
 map.on('singleclick', function (e) {
@@ -146,11 +171,48 @@ map.on('singleclick', function (e) {
     const props = feature.getProperties();
     if (props._instanceUrl && props.osm_id) {
         const url = `${props._instanceUrl.replace(/\/$/, '')}/#W${props.osm_id}`;
-        detailIframe.src = url;
-        detailTitle.textContent = props.name || props._instanceName || 'Spielplatz';
-        detailPanel.classList.add('open');
+        openDetailModal(url, props.name || props._instanceName || 'Spielplatz');
         hidePopup();
     }
+});
+
+// ── Search (Nominatim) ────────────────────────────────────────────────────────
+
+async function searchLocation(query) {
+    if (!query.trim()) return;
+    try {
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
+        const res = await fetch(url);
+        const results = await res.json();
+        if (results.length > 0) {
+            const { lon, lat } = results[0];
+            map.getView().animate({ center: fromLonLat([parseFloat(lon), parseFloat(lat)]), zoom: 13, duration: 600 });
+        }
+    } catch (e) {
+        console.warn('[hub] search failed:', e);
+    }
+}
+
+const searchInput = document.getElementById('topbar-search-input');
+document.getElementById('topbar-search-icon').addEventListener('click', () => searchLocation(searchInput.value));
+searchInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') searchLocation(searchInput.value);
+});
+
+// ── Locate me ─────────────────────────────────────────────────────────────────
+
+document.getElementById('topbar-locate').addEventListener('click', () => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            map.getView().animate({
+                center: fromLonLat([pos.coords.longitude, pos.coords.latitude]),
+                zoom: 13,
+                duration: 600,
+            });
+        },
+        err => console.warn('[hub] geolocation error:', err),
+    );
 });
 
 // ── Load data ─────────────────────────────────────────────────────────────────

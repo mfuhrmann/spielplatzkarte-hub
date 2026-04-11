@@ -21,14 +21,22 @@
         <span class="bi bi-geo-alt-fill"></span>
         Spielplatzkarte Hub
     </div>
+    <div id="topbar-search">
+        <span class="bi bi-search" id="topbar-search-icon"></span>
+        <input id="topbar-search-input" type="text" placeholder="Doppel-Shift für Suche" autocomplete="off">
+    </div>
+    <button id="topbar-locate" title="Meinen Standort anzeigen">
+        <span class="bi bi-crosshair"></span>
+    </button>
     <div id="instance-count" class="text-muted" style="font-size:13px;"></div>
 </div>
 
-<!-- Detail panel (iframe of regional instance) -->
+<!-- Backdrop + modal for regional instance detail -->
+<div id="detail-backdrop"></div>
 <div id="detail-panel">
     <div id="detail-panel-header">
         <span id="detail-panel-title"></span>
-        <button id="detail-panel-close" title="Schließen">
+        <button id="detail-panel-close" title="Schließen (ESC)">
             <span class="bi bi-x-lg"></span>
         </button>
     </div>

@@ -28,9 +28,12 @@ The Hub is a thin static frontend. It has no database of its own — all playgro
 - All playgrounds from all registered instances on one map
 - Same completeness colouring as regional instances (🟢 vollständig / 🟡 teilweise / 🔴 fehlen)
 - Instance name resolved from the OSM relation name (`get_meta`) — no manual naming needed
-- Instance panel with live load status per region (✓ count / error)
+- Instance panel with live load status and app version per region (✓ count v0.x.x / error)
 - Hover popup: name, access, size, completeness
-- Click: opens playground in the regional Spielplatzkarte instance
+- Click: opens playground in a full-screen modal overlay (iframe of the regional instance)
+- **ESC** or backdrop click closes the modal
+- Location search via [Nominatim](https://nominatim.openstreetmap.org) in the top bar — focus with **Double-Shift**
+- Locate me button: centres the map on the user's current GPS position
 - Single Docker container — no database, no PostgREST
 
 ---
@@ -142,7 +145,7 @@ A running regional instance is needed to load playground data. Point `public/reg
 |---|---|---|
 | Scope | One region (city / Kreis / Bundesland) | All registered regions |
 | Data | Local PostGIS database | Fetched live from regional instances |
-| Detail panel | Full (equipment, photos, POIs, reviews) | Link to regional instance |
+| Detail panel | Full (equipment, photos, POIs, reviews) | Regional instance in modal overlay |
 | Infrastructure | PostgreSQL + PostgREST + nginx | nginx only |
 
 ---
