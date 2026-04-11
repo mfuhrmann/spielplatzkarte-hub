@@ -18,7 +18,7 @@ BOLD='\033[1m'
 RESET='\033[0m'
 
 info()    { printf "${CYAN}▶ %s${RESET}\n" "$*"; }
-success() { printf "${GREEN}✓ %s${RESET}\n" "$*"; }
+success() { printf "${GREEN}✓ %s${RESET}\n"  "$*"; }
 warn()    { printf "${YELLOW}⚠ %s${RESET}\n" "$*"; }
 error()   { printf "${RED}✗ %s${RESET}\n" "$*" >&2; }
 bold()    { printf "${BOLD}%s${RESET}\n" "$*"; }
@@ -82,7 +82,7 @@ if ! docker info &>/dev/null; then
   exit 1
 fi
 
-success "Docker $(docker --version | awk '{print $3}' | tr -d ',')"
+success "Docker $(docker version --format '{{.Client.Version}}')"
 success "Compose (${COMPOSE_CMD[*]})"
 
 # ── Configuration prompts ──────────────────────────────────────────────────────
@@ -147,7 +147,7 @@ cat > .env <<EOF
 # Edit and run "docker compose up -d" to apply changes.
 
 # Image tag to run (e.g. latest, 0.2.1)
-IMAGE_TAG=${IMAGE_TAG}
+IMAGE_TAG="${IMAGE_TAG}"
 
 # URL of the instance registry.
 # Use ./registry.json to serve the local file (default),
@@ -155,13 +155,13 @@ IMAGE_TAG=${IMAGE_TAG}
 REGISTRY_URL=./registry.json
 
 # Initial map view
-MAP_ZOOM=${MAP_ZOOM}
-MAP_MIN_ZOOM=${MAP_MIN_ZOOM}
+MAP_ZOOM="${MAP_ZOOM}"
+MAP_MIN_ZOOM="${MAP_MIN_ZOOM}"
 # lon,lat
-MAP_CENTER=${MAP_CENTER}
+MAP_CENTER="${MAP_CENTER}"
 
 # Host port
-APP_PORT=${APP_PORT}
+APP_PORT="${APP_PORT}"
 EOF
 success ".env"
 
