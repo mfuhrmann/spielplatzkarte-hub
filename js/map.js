@@ -131,14 +131,25 @@ map.on('pointermove', function (e) {
     }
 });
 
-// Click → open regional instance
+// Click → open regional instance in detail panel
+const detailPanel = document.getElementById('detail-panel');
+const detailIframe = document.getElementById('detail-iframe');
+const detailTitle = document.getElementById('detail-panel-title');
+document.getElementById('detail-panel-close').addEventListener('click', () => {
+    detailPanel.classList.remove('open');
+    detailIframe.src = '';
+});
+
 map.on('singleclick', function (e) {
     const feature = map.forEachFeatureAtPixel(e.pixel, f => f, { layerFilter: l => l === playgroundLayer });
     if (!feature) return;
     const props = feature.getProperties();
     if (props._instanceUrl && props.osm_id) {
         const url = `${props._instanceUrl.replace(/\/$/, '')}/#W${props.osm_id}`;
-        window.open(url, '_blank', 'noopener');
+        detailIframe.src = url;
+        detailTitle.textContent = props.name || props._instanceName || 'Spielplatz';
+        detailPanel.classList.add('open');
+        hidePopup();
     }
 });
 
