@@ -22,6 +22,69 @@ docker compose up -d --build app   # Rebuild after code changes
 
 No linting is configured. Playwright browsers must be installed once before running tests: `npx playwright install chromium firefox webkit`.
 
+## Git Workflow
+
+**Never push directly to `main`.** All changes go through a feature branch and pull request.
+
+**Never create branches on upstream/forked repositories.** Branches are only created on this repository (`mfuhrmann/spielplatzkarte-hub`).
+
+```bash
+git checkout -b <type>/short-description   # branch off main
+# ... make changes ...
+git push -u origin <type>/short-description
+gh pr create                               # open PR targeting main
+```
+
+### Commit messages — Conventional Commits
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/):
+
+```
+<type>[optional scope]: <description>
+```
+
+Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `build`, `revert`
+
+- Breaking changes: append `!` after type/scope, or add `BREAKING CHANGE:` footer
+- Body and footers are optional; use them when the why isn't obvious
+
+## Releases
+
+Releases are driven by **git version tags**. The tag triggers the CI pipeline which builds and pushes Docker images.
+
+### Version alignment
+
+Three things must always show the same version number:
+
+| Artifact | Where set |
+|---|---|
+| App UI (shown in footer) | `version` field in `package.json` — imported at runtime by `js/map.js` |
+| Docker image tags | Derived automatically from the git tag by `docker/metadata-action` in CI |
+| Git tag | Source of truth — must match `package.json` |
+
+### Release process
+
+```bash
+# 1. Create a release branch
+git checkout -b chore/release-vX.Y.Z
+
+# 2. Bump the version in package.json
+npm version X.Y.Z --no-git-tag-version
+
+# 3. Commit and open a PR
+git add package.json package-lock.json
+git commit -m "chore(release): vX.Y.Z"
+git push -u origin chore/release-vX.Y.Z
+gh pr create --title "chore(release): vX.Y.Z"
+
+# 4. After the PR is merged, tag main
+git checkout main && git pull
+git tag vX.Y.Z
+git push origin vX.Y.Z
+```
+
+Pushing the tag triggers the `docker` CI job which publishes images tagged `X.Y.Z`, `X.Y`, and `latest` to `ghcr.io`.
+
 ## Architecture
 
 **Spielplatzkarte Hub** is a static federation map that aggregates playgrounds from multiple regional [Spielplatzkarte](https://spielplatzkarte.org) instances onto one OpenLayers map. There is no central database — all data is fetched live from regional instances at runtime via CORS.
