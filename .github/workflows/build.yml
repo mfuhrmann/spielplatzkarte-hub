@@ -30,10 +30,10 @@ jobs:
           node-version: 20
 
       - name: Install Dependencies
-        run: npm ci
+        run: make install
 
       - name: Build
-        run: npm run build
+        run: make build
 
   test:
     name: Browser Tests
@@ -50,7 +50,7 @@ jobs:
           node-version: 20
 
       - name: Install Dependencies
-        run: npm ci
+        run: make install
 
       - name: Cache Playwright Browsers
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7  # v5.0.4
@@ -61,14 +61,14 @@ jobs:
 
       - name: Install Playwright Browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium firefox webkit
+        run: make install-browsers
 
       - name: Install Playwright System Dependencies
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium firefox webkit
+        run: make install-browsers-deps
 
       - name: Run Browser Tests
-        run: npm test
+        run: make test
 
       - name: Upload Playwright Report
         if: always()

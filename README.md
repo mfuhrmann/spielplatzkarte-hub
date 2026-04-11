@@ -150,7 +150,7 @@ Edit `public/registry.json` and add your regional instances before building:
 ### 3. Start
 
 ```bash
-docker compose up -d --build
+make docker-up
 ```
 
 The Hub will be available at `http://localhost:8090` (or the port set in `APP_PORT`).
@@ -204,12 +204,14 @@ server {
 
 ## Local development
 
-**Requirements:** [Node.js](https://nodejs.org/) v18 or newer
+**Requirements:** [Node.js](https://nodejs.org/) v18 or newer, GNU Make
 
 ```bash
-npm install
-npm start    # dev server at http://localhost:5173
+make install   # install dependencies
+make dev       # dev server at http://localhost:5173
 ```
+
+Run `make help` to list all available targets.
 
 Point `public/registry.json` at a running regional instance — a local one works fine:
 
