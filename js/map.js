@@ -215,7 +215,7 @@ map.on('singleclick', function (e) {
     if (!feature) return;
     const props = feature.getProperties();
     if (props._instanceUrl && props.osm_id) {
-        const url = `${props._instanceUrl.replace(/\/$/, '')}/#W${props.osm_id}`;
+        const url = `${props._instanceUrl.replace(/\/$/, '')}/?embed=1#W${props.osm_id}`;
         openDetailModal(url, props.name || props._instanceName || 'Spielplatz');
         hidePopup();
     }
