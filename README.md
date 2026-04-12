@@ -117,7 +117,52 @@ The response must include `Access-Control-Allow-Origin: *`. If it doesn't:
 
 ## Deploy
 
-### 1. Clone and configure
+### Quick install (no clone required)
+
+The fastest way to get a production stack running is the installer script. It pulls the pre-built image from the container registry, generates a `docker-compose.yml` and `.env`, and walks you through configuration interactively.
+
+**Requirements:** Docker with Compose plugin (or standalone `docker-compose`)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mfuhrmann/spielplatzkarte-hub/main/install.sh | bash
+```
+
+Or download and inspect the script first:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mfuhrmann/spielplatzkarte-hub/main/install.sh -o install.sh
+bash install.sh
+```
+
+The installer will prompt for:
+
+| Prompt | Default | Description |
+|---|---|---|
+| Install directory | `spielplatzkarte-hub` | Directory to create the stack in |
+| Image tag | `latest` | Docker image tag to pin to (e.g. `0.2.1`) |
+| Host port | `8090` | Port the Hub is exposed on |
+| Map centre | `10.5,51.2` | Initial map centre as `lon,lat` |
+| Default zoom | `5` | Initial zoom level |
+| Minimum zoom | `4` | Minimum zoom level |
+
+After the installer finishes, edit `registry.json` in the install directory to add your regional instances, then the stack is ready. Changes to `registry.json` take effect on the next browser reload — no rebuild needed.
+
+**Updating to a newer image:**
+
+```bash
+cd spielplatzkarte-hub
+docker compose pull && docker compose up -d
+```
+
+To pin to a specific release, set `IMAGE_TAG` in `.env` and run `docker compose up -d`.
+
+---
+
+### Manual setup (from clone)
+
+Use this path if you want to build the image locally or modify the source.
+
+#### 1. Clone and configure
 
 ```bash
 git clone https://github.com/mfuhrmann/spielplatzkarte-hub.git
@@ -134,7 +179,7 @@ MAP_MIN_ZOOM=4
 APP_PORT=8090
 ```
 
-### 2. Register instances
+#### 2. Register instances
 
 Edit `public/registry.json` and add your regional instances before building:
 
@@ -147,7 +192,7 @@ Edit `public/registry.json` and add your regional instances before building:
 ]
 ```
 
-### 3. Start
+#### 3. Start
 
 ```bash
 make docker-up
