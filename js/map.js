@@ -198,7 +198,7 @@ function openDetailModal(url, title) {
 function closeDetailModal() {
     detailBackdrop.classList.remove('open');
     detailPanel.classList.remove('open');
-    detailIframe.src = '';
+    detailIframe.src = 'about:blank';
     detailIframeOrigin = null;
     window.removeEventListener('message', onIframeMessage);
 }
