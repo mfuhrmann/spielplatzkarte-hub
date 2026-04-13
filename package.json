@@ -1,6 +1,6 @@
 {
   "name": "spielplatzkarte-hub",
-  "version": "0.3.0-rc",
+  "version": "0.3.0",
   "scripts": {
     "start": "vite",
     "build": "vite build",
