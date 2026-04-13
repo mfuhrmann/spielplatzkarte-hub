@@ -60,15 +60,28 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`
 
 Releases are driven by **git version tags**. The tag triggers the CI pipeline which builds and pushes Docker images.
 
+### Version convention
+
+**`main` always carries the next minor version** — one minor bump ahead of the latest release tag.
+
+| State | `package.json` version | Docker image tags produced |
+|---|---|---|
+| After releasing `v0.2.1`, before next release | `0.3.0` | `0.3.0-rc` (on every push to main) |
+| When `v0.3.0` tag is pushed | `0.3.0` at tag time | `0.3.0`, `0.3`, `latest`, `sha-<hash>` |
+| After releasing `v0.3.0` | `0.4.0` (bump PR) | `0.4.0-rc` (on every push to main) |
+
+This means:
+- **`latest`** always points to the most recent stable release — never to unreleased work.
+- **`<version>-rc`** (e.g. `0.3.0-rc`) is the current HEAD of `main` and moves with every push.
+- The SHA tag is also always published for immutable pinning.
+
 ### Version alignment
 
-Three things must always show the same version number:
-
-| Artifact | Where set |
-|---|---|
-| App UI (shown in footer) | `version` field in `package.json` — imported at runtime by `js/map.js` |
-| Docker image tags | Derived automatically from the git tag by `docker/metadata-action` in CI |
-| Git tag | Source of truth — must match `package.json` |
+| Artifact | Where set | Value |
+|---|---|---|
+| App UI (shown in footer) | `version` field in `package.json` — imported at runtime by `js/map.js` | Next minor version on `main`; release version at tag time |
+| Docker image tags | Derived by CI from git tag (semver tags) or `package.json` via `jq` (RC tag) | See table above |
+| Git tag | Source of truth for stable releases | Must match the `package.json` version at the moment of tagging |
 
 ### Release process
 
@@ -76,7 +89,7 @@ Three things must always show the same version number:
 # 1. Create a release branch
 git checkout -b chore/release-vX.Y.Z
 
-# 2. Bump the version in package.json
+# 2. Set the exact release version in package.json (removes the -rc intent)
 npm version X.Y.Z --no-git-tag-version
 
 # 3. Commit and open a PR
@@ -89,9 +102,17 @@ gh pr create --title "chore(release): vX.Y.Z"
 git checkout main && git pull
 git tag vX.Y.Z
 git push origin vX.Y.Z
-```
+# → CI publishes X.Y.Z, X.Y, and latest to ghcr.io
 
-Pushing the tag triggers the `docker` CI job which publishes images tagged `X.Y.Z`, `X.Y`, and `latest` to `ghcr.io`.
+# 5. Immediately bump main to the next minor version
+git checkout -b chore/bump-vX.(Y+1).0
+npm version X.(Y+1).0 --no-git-tag-version
+git add package.json package-lock.json
+git commit -m "chore: bump version to X.(Y+1).0 for next development cycle"
+git push -u origin chore/bump-vX.(Y+1).0
+gh pr create --title "chore: bump version to X.(Y+1).0"
+# → After merge, main pushes will produce X.(Y+1).0-rc images
+```
 
 ## Architecture
 
