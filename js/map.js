@@ -198,9 +198,11 @@ function openDetailModal(url, title) {
 function closeDetailModal() {
     detailBackdrop.classList.remove('open');
     detailPanel.classList.remove('open');
-    detailIframe.src = '';
-    detailIframeOrigin = null;
+    // Remove listener before navigating away so any in-flight messages from the
+    // departing page are ignored rather than relying on the detailIframeOrigin null guard.
     window.removeEventListener('message', onIframeMessage);
+    detailIframeOrigin = null;
+    detailIframe.src = 'about:blank';
 }
 
 // Expose for automated tests.
