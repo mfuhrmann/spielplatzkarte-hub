@@ -179,13 +179,20 @@ const detailTitle = document.getElementById('detail-panel-title');
 
 let detailIframeOrigin = null;
 
+// Registered only while the modal is open; removed on close to avoid a
+// persistent listener that processes every cross-frame message on the page.
+function onIframeMessage(e) {
+    if (e.origin !== detailIframeOrigin) return;
+    if (e.data?.type === 'spielplatzkarte:escape') closeDetailModal();
+}
+
 function openDetailModal(url, title) {
-    const parsed = new URL(url);
-    detailIframeOrigin = parsed.origin;
+    detailIframeOrigin = new URL(url).origin;
     detailIframe.src = url;
     detailTitle.textContent = title;
     detailBackdrop.classList.add('open');
     detailPanel.classList.add('open');
+    window.addEventListener('message', onIframeMessage);
 }
 
 function closeDetailModal() {
@@ -193,21 +200,14 @@ function closeDetailModal() {
     detailPanel.classList.remove('open');
     detailIframe.src = '';
     detailIframeOrigin = null;
+    window.removeEventListener('message', onIframeMessage);
 }
 
 // Expose for automated tests.
 window.__openDetailModal = openDetailModal;
-window.__closeDetailModal = closeDetailModal;
 
 document.getElementById('detail-panel-close').addEventListener('click', closeDetailModal);
 detailBackdrop.addEventListener('click', closeDetailModal);
-// ESC forwarded from spielplatzkarte iframe via postMessage (direct contentWindow access is
-// blocked by the browser's same-origin policy for cross-origin frames).
-// Always validate the origin before acting on the message.
-window.addEventListener('message', e => {
-    if (!detailIframeOrigin || e.origin !== detailIframeOrigin) return;
-    if (e.data?.type === 'spielplatzkarte:escape') closeDetailModal();
-});
 
 let lastShift = 0;
 document.addEventListener('keydown', e => {
