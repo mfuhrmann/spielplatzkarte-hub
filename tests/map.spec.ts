@@ -3,6 +3,7 @@ import { test, expect, Page } from '@playwright/test';
 declare global {
   interface Window {
     __map: import('ol').Map;
+    __openDetailModal: (url: string, title: string) => void;
   }
 }
 
@@ -77,6 +78,32 @@ test('wheel scroll zooms out', async ({ page }) => {
   await waitForZoomChange(page, before, '<');
   const after = await page.evaluate(() => window.__map.getView().getZoom()!);
   expect(after).toBeLessThan(before);
+});
+
+test('spielplatzkarte:escape from iframe origin closes modal', async ({ page }) => {
+  // Open modal for the test server's own origin so postMessage can come from same origin.
+  await page.evaluate(() => {
+    window.__openDetailModal(window.location.href, 'Test Playground');
+  });
+  await expect(page.locator('#detail-panel')).toHaveClass(/open/);
+
+  // postMessage from the same origin → guard passes → modal closes.
+  await page.evaluate(() => {
+    window.postMessage({ type: 'spielplatzkarte:escape' }, window.location.origin);
+  });
+  await expect(page.locator('#detail-panel')).not.toHaveClass(/open/);
+});
+
+test('spielplatzkarte:escape without prior openDetailModal does not close panel', async ({ page }) => {
+  // Open panel directly via DOM — no openDetailModal call means no message listener
+  // is registered, so an escape postMessage must have no effect.
+  await page.evaluate(() => {
+    document.getElementById('detail-backdrop')!.classList.add('open');
+    document.getElementById('detail-panel')!.classList.add('open');
+    window.postMessage({ type: 'spielplatzkarte:escape' }, window.location.origin);
+  });
+  await page.waitForTimeout(200);
+  await expect(page.locator('#detail-panel')).toHaveClass(/open/);
 });
 
 test('drag pans the map', async ({ page }) => {
