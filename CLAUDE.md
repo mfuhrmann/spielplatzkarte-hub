@@ -66,9 +66,9 @@ Releases are driven by **git version tags**. The tag triggers the CI pipeline wh
 
 | State | `package.json` version | Docker image tags produced |
 |---|---|---|
-| After releasing `v0.2.1`, before next release | `0.3.0` | `0.3.0-rc` (on every push to main) |
+| After releasing `v0.2.1`, before next release | `0.3.0-rc` | `0.3.0-rc` (on every push to main) |
 | When `v0.3.0` tag is pushed | `0.3.0` at tag time | `0.3.0`, `0.3`, `latest`, `sha-<hash>` |
-| After releasing `v0.3.0` | `0.4.0` (bump PR) | `0.4.0-rc` (on every push to main) |
+| After releasing `v0.3.0` | `0.4.0-rc` (bump PR) | `0.4.0-rc` (on every push to main) |
 
 This means:
 - **`latest`** always points to the most recent stable release — never to unreleased work.
@@ -79,9 +79,9 @@ This means:
 
 | Artifact | Where set | Value |
 |---|---|---|
-| App UI (shown in footer) | `version` field in `package.json` — imported at runtime by `js/map.js` | Next minor version on `main`; release version at tag time |
+| App UI (shown in footer) | `version` field in `package.json` — imported at runtime by `js/map.js` | Next minor RC version on `main` (e.g. `0.3.0-rc`); release version at tag time |
 | Docker image tags | Derived by CI from git tag (semver tags) or `package.json` via `jq` (RC tag) | See table above |
-| Git tag | Source of truth for stable releases | Must match the `package.json` version at the moment of tagging |
+| Git tag | Source of truth for stable releases | Must match the `package.json` version at the moment of tagging (without `-rc`) |
 
 ### Release process
 
@@ -89,7 +89,7 @@ This means:
 # 1. Create a release branch
 git checkout -b chore/release-vX.Y.Z
 
-# 2. Set the exact release version in package.json (removes the -rc intent)
+# 2. Set the exact release version in package.json (strips the -rc suffix)
 npm version X.Y.Z --no-git-tag-version
 
 # 3. Commit and open a PR
@@ -104,13 +104,13 @@ git tag vX.Y.Z
 git push origin vX.Y.Z
 # → CI publishes X.Y.Z, X.Y, and latest to ghcr.io
 
-# 5. Immediately bump main to the next minor version
-git checkout -b chore/bump-vX.(Y+1).0
-npm version X.(Y+1).0 --no-git-tag-version
+# 5. Immediately bump main to the next minor RC version
+git checkout -b chore/bump-vX.(Y+1).0-rc
+npm version X.(Y+1).0-rc --no-git-tag-version
 git add package.json package-lock.json
-git commit -m "chore: bump version to X.(Y+1).0 for next development cycle"
-git push -u origin chore/bump-vX.(Y+1).0
-gh pr create --title "chore: bump version to X.(Y+1).0"
+git commit -m "chore: bump version to X.(Y+1).0-rc for next development cycle"
+git push -u origin chore/bump-vX.(Y+1).0-rc
+gh pr create --title "chore: bump version to X.(Y+1).0-rc"
 # → After merge, main pushes will produce X.(Y+1).0-rc images
 ```
 
