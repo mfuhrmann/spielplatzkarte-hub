@@ -177,7 +177,11 @@ const detailPanel = document.getElementById('detail-panel');
 const detailIframe = document.getElementById('detail-iframe');
 const detailTitle = document.getElementById('detail-panel-title');
 
+let detailIframeOrigin = null;
+
 function openDetailModal(url, title) {
+    const parsed = new URL(url);
+    detailIframeOrigin = parsed.origin;
     detailIframe.src = url;
     detailTitle.textContent = title;
     detailBackdrop.classList.add('open');
@@ -188,12 +192,20 @@ function closeDetailModal() {
     detailBackdrop.classList.remove('open');
     detailPanel.classList.remove('open');
     detailIframe.src = '';
+    detailIframeOrigin = null;
 }
+
+// Expose for automated tests.
+window.__openDetailModal = openDetailModal;
+window.__closeDetailModal = closeDetailModal;
 
 document.getElementById('detail-panel-close').addEventListener('click', closeDetailModal);
 detailBackdrop.addEventListener('click', closeDetailModal);
-// ESC forwarded from spielplatzkarte iframe (iframe captures keyboard focus after a click)
+// ESC forwarded from spielplatzkarte iframe via postMessage (direct contentWindow access is
+// blocked by the browser's same-origin policy for cross-origin frames).
+// Always validate the origin before acting on the message.
 window.addEventListener('message', e => {
+    if (!detailIframeOrigin || e.origin !== detailIframeOrigin) return;
     if (e.data?.type === 'spielplatzkarte:escape') closeDetailModal();
 });
 

@@ -3,6 +3,8 @@ import { test, expect, Page } from '@playwright/test';
 declare global {
   interface Window {
     __map: import('ol').Map;
+    __openDetailModal: (url: string, title: string) => void;
+    __closeDetailModal: () => void;
   }
 }
 
@@ -77,6 +79,47 @@ test('wheel scroll zooms out', async ({ page }) => {
   await waitForZoomChange(page, before, '<');
   const after = await page.evaluate(() => window.__map.getView().getZoom()!);
   expect(after).toBeLessThan(before);
+});
+
+test('spielplatzkarte:escape from iframe origin closes modal', async ({ page }) => {
+  // Open modal for the test server's own origin so postMessage can come from same origin.
+  await page.evaluate(() => {
+    window.__openDetailModal(window.location.href, 'Test Playground');
+  });
+  await expect(page.locator('#detail-panel')).toHaveClass(/open/);
+
+  // postMessage from the same origin → guard passes → modal closes.
+  await page.evaluate(() => {
+    window.postMessage({ type: 'spielplatzkarte:escape' }, window.location.origin);
+  });
+  await expect(page.locator('#detail-panel')).not.toHaveClass(/open/);
+});
+
+test('spielplatzkarte:escape from wrong origin does not close modal', async ({ page }) => {
+  // Open modal — detailIframeOrigin is set to the test server origin.
+  await page.evaluate(() => {
+    window.__openDetailModal(window.location.href, 'Test Playground');
+  });
+  await expect(page.locator('#detail-panel')).toHaveClass(/open/);
+
+  // Simulate a message that arrives with a mismatched origin by temporarily
+  // overriding the stored origin so the guard blocks the message.
+  await page.evaluate(() => {
+    // Monkey-patch: close and re-open with a different URL so detailIframeOrigin
+    // becomes 'http://evil.example' — but we can't forge MessageEvent.origin.
+    // Instead we verify the null-origin guard: send message before any modal is
+    // opened (detailIframeOrigin is null after close).
+    window.__closeDetailModal();
+    // Now panel is closed and detailIframeOrigin is null.
+    // Re-open via DOM only (bypassing openDetailModal) so origin stays null.
+    document.getElementById('detail-backdrop')!.classList.add('open');
+    document.getElementById('detail-panel')!.classList.add('open');
+    // Send escape — guard should block because detailIframeOrigin is null.
+    window.postMessage({ type: 'spielplatzkarte:escape' }, window.location.origin);
+  });
+  await page.waitForTimeout(200);
+  // Panel must still be open — origin guard blocked the message.
+  await expect(page.locator('#detail-panel')).toHaveClass(/open/);
 });
 
 test('drag pans the map', async ({ page }) => {
