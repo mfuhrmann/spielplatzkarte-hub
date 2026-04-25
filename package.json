@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
-    "vite": "^8.0.8"
+    "vite": "^8.0.10"
   },
   "dependencies": {
     "bootstrap": "^5.3.3",
